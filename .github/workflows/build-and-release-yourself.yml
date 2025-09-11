@@ -35,7 +35,7 @@ jobs:
 
       - name: Download and Validate IPA
         run: |
-          wget "${{ inputs.ipa_url }}" --no-verbose -O ${{ github.workspace }}/spotify.ipa
+          wget --user-agent Mozilla/5.0 "${{ inputs.ipa_url }}" --no-verbose -O ${{ github.workspace }}/spotify.ipa
           file_type=$(file --mime-type -b ${{ github.workspace }}/spotify.ipa)
           if [[ "$file_type" != "application/x-ios-app" && "$file_type" != "application/zip" ]]; then
             echo "::error::Validation failed: The downloaded file is not a valid IPA. Detected type: $file_type."
@@ -44,7 +44,7 @@ jobs:
 
       - name: Download and Validate Tweak
         run: |
-          wget "${{ inputs.tweak_url }}" --no-verbose -O ${{ github.workspace }}/eeveespotify.deb
+          wget --user-agent Mozilla/5.0 "${{ inputs.tweak_url }}" --no-verbose -O ${{ github.workspace }}/eeveespotify.deb
           file_type=$(file --mime-type -b ${{ github.workspace }}/eeveespotify.deb)
           if [[ "$file_type" != "application/vnd.debian.binary-package" ]]; then
             echo "::error::Validation failed: The file is not a valid DEB file. Detected type: $file_type."
