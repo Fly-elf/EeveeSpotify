@@ -1,7 +1,13 @@
 name: Build and Release Swift
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "URL to the decrypted IPA file"
+        default: ""
+        required: true
+        type: string
 
 env:
   SWIFTPROTOBUF_VERSION: "1.29.0"
@@ -106,10 +112,8 @@ jobs:
 
     - name: Download Decrypted Spotify Package
       run: |
-        response=$(curl -ks 'https://decrypt.whoeevee.com/decrypted?appId=324684580&apiKey=${{ secrets.EEVEEDECRYPTER_API_KEY }}')
-        link=$(echo "$response" | jq -r '.link')
-        wget --no-check-certificate -q $link
-        echo "SPOTIFY_VERSION=${${(s/-/)link}[2]%.ipa}" >> $GITHUB_ENV
+        wget --user-agent Mozilla/5.0 "${{ inputs.ipa_url }} -O spotify.ipa"
+        echo "SPOTIFY_VERSION=1.0.0" >> $GITHUB_ENV
         echo "SPOTIFY_PACKAGE=$(echo *.ipa)" >> $GITHUB_ENV
 
     - name: Setup insert-dylib
@@ -207,12 +211,3 @@ jobs:
           "$EEVEESPOTIFY_ROOTFUL" "$EEVEESPOTIFY_ROOTLESS" \
           "$SWIFTPROTOBUF_ROOTFUL" "$SWIFTPROTOBUF_ROOTLESS" \
           --clobber
-
-    - name: Upload Packages to Telegram
-      env:
-        API_ID: ${{ secrets.API_ID }}
-        API_HASH: ${{ secrets.API_HASH }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        EEVEESPOTIFY_CHANNEL_ID: ${{ secrets.EEVEESPOTIFY_CHANNEL_ID }}
-        EEVEESPOTIFY_CHANNEL_ACCESS_HASH: ${{ secrets.EEVEESPOTIFY_CHANNEL_ACCESS_HASH }}
-      run: ./Tools/TelegramUploadEeveeSpotify
